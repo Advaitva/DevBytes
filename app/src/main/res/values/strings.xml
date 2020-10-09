@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">DevBytes</string>
+    <string name="pass_hint">Password</string>
+    <string name="mail_hint">Email</string>
+    <string name="login_head">Log In</string>
+    <string name="signup_head">Sign Up</string>
+    <string name="login_signup_message">Don\'t have an account?</string>
+    <string name="signup_login_message">Already have an account?</string>
+    <string name="name_hint">Name</string>
+    <string name="conf_pass_hint">Confirm Password</string>
+    <string name="action_searchTitle">Search</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_logout">Log Out</string>
+    <string name="setting_update">Save Settings</string>
 </resources>

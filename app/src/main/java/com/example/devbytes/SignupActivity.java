@@ -77,12 +77,14 @@ public class SignupActivity extends AppCompatActivity {
                     }
                     else{
                         Toast.makeText(SignupActivity.this,"Passwords do not match",Toast.LENGTH_SHORT).show();
+                    signupProgress.setVisibility(View.INVISIBLE);
                     }
                 }
                 else{
                     Toast.makeText(SignupActivity.this,"All fields are mandatory..",Toast.LENGTH_SHORT).show();
+                    signupProgress.setVisibility(View.INVISIBLE);
+
                 }
-                signupProgress.setVisibility(View.INVISIBLE);
 
 
             }

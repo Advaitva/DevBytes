@@ -14,17 +14,24 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -32,6 +39,9 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import org.w3c.dom.Text;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -41,10 +51,14 @@ public class Setup extends AppCompatActivity {
     private Uri mainImageUri=null;
     private EditText setupName;
     private Button setupBtn;
+    private String user_id;
+
 
     private StorageReference mStorageRef;
     private FirebaseAuth firebaseAuth;
     private ProgressBar setupProgress;
+
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,25 +69,59 @@ public class Setup extends AppCompatActivity {
         setSupportActionBar(setupToolbar);
         getSupportActionBar().setTitle("Account Setup");
 
-        firebaseAuth=FirebaseAuth.getInstance();
-        mStorageRef= FirebaseStorage.getInstance().getReference();
-
         setupImage=findViewById(R.id.setup_image);
         setupName=findViewById(R.id.setup_name);
         setupBtn=findViewById(R.id.setup_btn);
         setupProgress=findViewById(R.id.setup_progressBar);
 
+        firebaseAuth=FirebaseAuth.getInstance();
+        mStorageRef= FirebaseStorage.getInstance().getReference();
+        db= FirebaseFirestore.getInstance();
+        user_id=firebaseAuth.getCurrentUser().getUid();
+
+        setupProgress.setVisibility(View.VISIBLE);
+        setupBtn.setEnabled(false);
+        db.collection("Users").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if(task.isSuccessful()){
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        Map<String, Object> userData=document.getData();
+                        if(user_id.equals(userData.get("user_id"))){
+                            Log.v("DBTag",  " => " + userData.get("user_image"));
+                            setupName.setText((String)userData.get("user_name"));
+                            String image=(String)userData.get("user_image");
+                            mainImageUri=Uri.parse(image);
+                            Glide.with(Setup.this).load(image).into(setupImage);
+                        }
+                    }
+
+                }
+                else{
+                    String errorMsg=task.getException().getMessage();
+                    Toast.makeText(Setup.this,"Error: "+errorMsg,Toast.LENGTH_SHORT).show();
+                }
+                setupProgress.setVisibility(View.INVISIBLE);
+                setupBtn.setEnabled(true);
+            }
+        });
+
+
+
+
+
         setupBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String userName=setupName.getText().toString();
+                final String userName=setupName.getText().toString();
                 if(!TextUtils.isEmpty(userName) && mainImageUri!=null){
-                    String user_id=firebaseAuth.getCurrentUser().getUid();
+                    user_id=firebaseAuth.getCurrentUser().getUid();
                     setupProgress.setVisibility(View.VISIBLE);
                     StorageReference image_path=mStorageRef.child("profile_pics").child(user_id+".jpg");
                     image_path.putFile(mainImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
 
                             if (taskSnapshot.getMetadata() != null) {
                                 if (taskSnapshot.getMetadata().getReference() != null) {
@@ -81,17 +129,34 @@ public class Setup extends AppCompatActivity {
                                     result.addOnSuccessListener(new OnSuccessListener<Uri>() {
                                         @Override
                                         public void onSuccess(Uri uri) {
+//                      Toast.makeText(Setup.this,"URL generated!",Toast.LENGTH_SHORT).show();
                                             String imageUrl = uri.toString();
-                                            Toast.makeText(Setup.this,"Updated!",Toast.LENGTH_SHORT).show();
-                                            Intent intent=new  Intent(Setup.this,MainActivity.class);
-                                            startActivity(intent);
+                                            Map<String,String> userMap=new HashMap<>();
+                                            userMap.put("user_id",user_id);
+                                            userMap.put("user_name",userName);
+                                            userMap.put("user_image",imageUrl);
+
+                                            db.collection("Users").add(userMap).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                @Override
+                                                public void onSuccess(DocumentReference documentReference) {
+                                                    Toast.makeText(Setup.this,"Updated!",Toast.LENGTH_SHORT).show();
+                                                    Intent intent=new  Intent(Setup.this,MainActivity.class);
+                                                    startActivity(intent);
+                                                    finish();
+                                                }
+                                            }).addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    String errorMsg=e.getMessage();
+                                                    Toast.makeText(Setup.this,"Error:",Toast.LENGTH_SHORT).show();
+                                                    Toast.makeText(Setup.this,"Error: "+errorMsg,Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
+
                                         }
                                     });
                                 }
                             }
-
-
-
 
 
                         }
@@ -100,9 +165,10 @@ public class Setup extends AppCompatActivity {
                         public void onFailure(@NonNull Exception e) {
                             String errorMsg= e.getMessage();
                             Toast.makeText(Setup.this,"Error: "+errorMsg,Toast.LENGTH_SHORT).show();
+                            setupProgress.setVisibility(View.INVISIBLE);
+
                         }
                     });
-                    setupProgress.setVisibility(View.INVISIBLE);
                 }
                 else{
                     Toast.makeText(Setup.this,"Please select all required items",Toast.LENGTH_SHORT).show();
@@ -147,4 +213,5 @@ public class Setup extends AppCompatActivity {
             }
         }
     }
+
 }

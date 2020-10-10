@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">&lt;DevBytes/&gt;</string>
+    <string name="app_name">&lt; DevBytes /&gt;</string>
     <string name="pass_hint">Password</string>
     <string name="mail_hint">Email</string>
     <string name="login_head">Log In</string>

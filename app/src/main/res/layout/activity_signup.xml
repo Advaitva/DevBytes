@@ -24,41 +24,28 @@
         app:layout_constraintVertical_bias="0.187" />
 
     <EditText
-        android:id="@+id/nameSignup"
-        android:layout_width="320dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="44dp"
-        android:ems="10"
-        android:hint="@string/name_hint"
-        android:inputType="textPersonName"
-        app:layout_constraintEnd_toEndOf="@+id/signupText"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="@+id/signupText"
-        app:layout_constraintTop_toBottomOf="@+id/signupText" />
-
-    <EditText
         android:id="@+id/emailSignup"
         android:layout_width="320dp"
         android:layout_height="50dp"
-        android:layout_marginTop="25dp"
+        android:layout_marginTop="32dp"
         android:ems="10"
         android:hint="@string/mail_hint"
         android:inputType="textEmailAddress"
-        app:layout_constraintEnd_toEndOf="@+id/nameSignup"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/nameSignup"
-        app:layout_constraintTop_toBottomOf="@+id/nameSignup" />
+        app:layout_constraintEnd_toEndOf="@+id/signupText"
+        app:layout_constraintHorizontal_bias="0.503"
+        app:layout_constraintStart_toStartOf="@+id/signupText"
+        app:layout_constraintTop_toBottomOf="@+id/signupText" />
 
     <EditText
         android:id="@+id/passSignup"
         android:layout_width="320dp"
         android:layout_height="50dp"
-        android:layout_marginTop="25dp"
+        android:layout_marginTop="32dp"
         android:ems="10"
         android:hint="@string/pass_hint"
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="@+id/emailSignup"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/emailSignup"
         app:layout_constraintTop_toBottomOf="@+id/emailSignup" />
 
@@ -66,15 +53,14 @@
         android:id="@+id/pass2Signup"
         android:layout_width="320dp"
         android:layout_height="50dp"
-        android:layout_marginTop="25dp"
+        android:layout_marginTop="36dp"
         android:ems="10"
         android:hint="@string/conf_pass_hint"
         android:inputType="textPassword"
-        app:layout_constraintBottom_toTopOf="@+id/btnSignup"
         app:layout_constraintEnd_toEndOf="@+id/passSignup"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/passSignup"
-        app:layout_constraintTop_toBottomOf="@+id/passSignup"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@+id/passSignup" />
 
     <Button
         android:id="@+id/btnSignup"
@@ -85,12 +71,12 @@
         android:textAllCaps="false"
         android:textColor="@color/colorPrimary"
         android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/btnSignupLogin"
         app:layout_constraintEnd_toEndOf="@+id/pass2Signup"
-        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="@+id/pass2Signup"
-        app:layout_constraintTop_toBottomOf="@+id/passSignup"
-        app:layout_constraintVertical_bias="0.38" />
+        app:layout_constraintTop_toBottomOf="@+id/pass2Signup"
+        app:layout_constraintVertical_bias="0.275" />
 
     <Button
         android:id="@+id/btnSignupLogin"

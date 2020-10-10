@@ -20,7 +20,6 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class SignupActivity extends AppCompatActivity {
 
-    private EditText signupName;
     private EditText signupEmail;
     private EditText signupPass;
     private EditText signupConfPass;
@@ -35,7 +34,6 @@ public class SignupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        signupName=(EditText) findViewById(R.id.nameSignup);
         signupEmail=(EditText) findViewById(R.id.emailSignup);
         signupPass=(EditText) findViewById(R.id.passSignup);
         signupConfPass=(EditText) findViewById(R.id.pass2Signup);

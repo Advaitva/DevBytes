@@ -8,8 +8,8 @@
 
     <TextView
         android:id="@+id/signupText"
-        android:layout_width="173dp"
-        android:layout_height="60dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="250dp"
         android:fontFamily="sans-serif-light"
         android:gravity="center"

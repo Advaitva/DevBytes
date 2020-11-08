@@ -106,10 +106,6 @@ public class Setup extends AppCompatActivity {
             }
         });
 
-
-
-
-
         setupBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

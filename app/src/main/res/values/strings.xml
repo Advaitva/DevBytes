@@ -17,4 +17,5 @@
     <string name="title_hint">Add Title...</string>
     <string name="desc_hint">Post Description....</string>
     <string name="post_btn">Post</string>
+    <string name="cardViewTitle">Card View Layout</string>
 </resources>

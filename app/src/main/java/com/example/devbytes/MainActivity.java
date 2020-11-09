@@ -4,6 +4,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.material.snackbar.Snackbar;
 
 import android.content.Intent;
@@ -23,6 +31,12 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
     RecyclerView recyclerView;
     RecyclerAdapter recyclerAdapter;
-    List<String> techUpdate;
+    List<String> techUpdateTitle;
     SwipeRefreshLayout swipeRefreshLayout;
 
 
@@ -63,48 +77,44 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
             }
         });
 
-        techUpdate = new ArrayList<>();
+        techUpdateTitle = new ArrayList<>();
+        RequestQueue requestQueue=Volley.newRequestQueue(this);
 
+        String api="https://devbytes-api.herokuapp.com/data";
+//        String api="https://randomuser.me/api";
+
+
+        JsonArrayRequest objectRequest= new JsonArrayRequest(Request.Method.GET, api, null, new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        try {
+                            for(int i=0;i<response.length();i++){
+                                JSONObject obj=response.getJSONObject(i);
+                                techUpdateTitle.add(obj.getString("post_title"));
+
+                            }
+                        }catch (JSONException e){
+                            e.printStackTrace();
+                        }
+                    }
+                 },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("API response",error.toString());
+                        Toast.makeText(MainActivity.this, "Something went wrong during api call", Toast.LENGTH_SHORT).show();
+                    }
+        });
+        requestQueue.add(objectRequest);
         recyclerView = findViewById(R.id.recyclerView);
-        recyclerAdapter = new RecyclerAdapter(techUpdate, this);
+        recyclerAdapter = new RecyclerAdapter(techUpdateTitle, this);
         recyclerView.setAdapter(recyclerAdapter);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration);
-
-        techUpdate.add("Tech Update Title 1");
-        techUpdate.add("Tech Update Title 2");
-        techUpdate.add("Tech Update Title 3");
-        techUpdate.add("Tech Update Title 4");
-        techUpdate.add("Tech Update Title 5");
-        techUpdate.add("Tech Update Title 6");
-        techUpdate.add("Tech Update Title 7");
-        techUpdate.add("Tech Update Title 8");
-        techUpdate.add("Tech Update Title 9");
-        techUpdate.add("Tech Update Title 10");
-        techUpdate.add("Tech Update Title 11");
-        techUpdate.add("Tech Update Title 12");
-        techUpdate.add("Tech Update Title 13");
-        techUpdate.add("Tech Update Title 14");
-        techUpdate.add("Tech Update Title 15");
-        techUpdate.add("Tech Update Title 16");
-        techUpdate.add("Tech Update Title 17");
-        techUpdate.add("Tech Update Title 18");
-        techUpdate.add("Tech Update Title 19");
-        techUpdate.add("Tech Update Title 20");
-        techUpdate.add("Tech Update Title 21");
-        techUpdate.add("Tech Update Title 22");
-        techUpdate.add("Tech Update Title 23");
-
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                techUpdate.add("Tech Update Title 24");
-                techUpdate.add("Tech Update Title 25");
-                techUpdate.add("Tech Update Title 26");
-                techUpdate.add("Tech Update Title 27");
-                techUpdate.add("Tech Update Title 28");
-
                 recyclerAdapter.notifyDataSetChanged();
                 swipeRefreshLayout.setRefreshing(false);
             }
@@ -129,23 +139,23 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
             switch (direction) {
                 case ItemTouchHelper.LEFT:
-                    deletedTech = techUpdate.get(position);
-                    techUpdate.remove(position);
+                    deletedTech = techUpdateTitle.get(position);
+                    techUpdateTitle.remove(position);
                     recyclerAdapter.notifyItemRemoved(position);
                     Snackbar.make(recyclerView, deletedTech, Snackbar.LENGTH_LONG)
                             .setAction("Undo", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    techUpdate.add(position, deletedTech);
+                                    techUpdateTitle.add(position, deletedTech);
                                     recyclerAdapter.notifyItemInserted(position);
                                 }
                             }).show();
                     break;
                 case ItemTouchHelper.RIGHT:
-                    final String tech = techUpdate.get(position);
+                    final String tech = techUpdateTitle.get(position);
                     archivedTech.add(tech);
 
-                    techUpdate.remove(position);
+                    techUpdateTitle.remove(position);
                     recyclerAdapter.notifyItemRemoved(position);
 
                     Snackbar.make(recyclerView, tech + ", Archived.", Snackbar.LENGTH_LONG)
@@ -153,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
                                 @Override
                                 public void onClick(View view) {
                                     archivedTech.remove(archivedTech.lastIndexOf(tech));
-                                    techUpdate.add(position, tech);
+                                    techUpdateTitle.add(position, tech);
                                     recyclerAdapter.notifyItemInserted(position);
                                 }
                             }).show();
@@ -184,12 +194,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
     @Override
     public void onItemClick(int position) {
         Intent intent = new Intent(this, ReadTech.class);
-        intent.putExtra("Tech", techUpdate.get(position));
+        intent.putExtra("Tech", techUpdateTitle.get(position));
         startActivity(intent);
     }
     @Override
     public void onLongItemClick(final int position) {
-//        techUpdate.remove(position);
+//        techUpdateTitle.remove(position);
 //        recyclerAdapter.notifyItemRemoved(position);
     }
 

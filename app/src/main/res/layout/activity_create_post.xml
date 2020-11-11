@@ -14,16 +14,17 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/imageView3"
+        android:id="@+id/newpostImage"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="10dp"
         android:layout_marginBottom="50dp"
+        android:src="@drawable/add_post_holder"
         app:layout_constraintBottom_toTopOf="@+id/createPostTitle"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/createPostToolbar"
-        android:src="@drawable/user_default"  />
+        app:layout_constraintTop_toBottomOf="@+id/createPostToolbar" />
 
     <EditText
         android:id="@+id/createPostTitle"
@@ -35,13 +36,14 @@
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView3" />
+        app:layout_constraintTop_toBottomOf="@+id/newpostImage" />
+
     <EditText
         android:id="@+id/createPostDesc"
         android:layout_width="344dp"
-        android:layout_height="40dp"
-        android:ems="10"
+        android:layout_height="59dp"
         android:layout_marginTop="50dp"
+        android:ems="10"
         android:gravity="start|top"
         android:hint="@string/desc_hint"
         android:inputType="textMultiLine"
@@ -63,5 +65,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/createPostDesc" />
+
+    <ProgressBar
+        android:id="@+id/postProgressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/createPostToolbar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

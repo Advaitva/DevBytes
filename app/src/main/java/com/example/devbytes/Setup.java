@@ -153,8 +153,6 @@ public class Setup extends AppCompatActivity {
                                     });
                                 }
                             }
-
-
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override

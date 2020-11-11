@@ -20,7 +20,7 @@
         android:theme="@style/AppTheme"
         tools:targetApi="m">
         <activity android:name=".CardView" />
-        <activity android:name=".CreatePost" />
+        <activity android:name=".CreatePost" android:parentActivityName=".MainActivity"/>
         <activity
             android:name=".SplashScreen"
             android:screenOrientation="portrait">

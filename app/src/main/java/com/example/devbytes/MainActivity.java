@@ -10,8 +10,9 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 
 import android.content.Intent;
@@ -24,15 +25,15 @@ import android.view.View;
 import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,13 +41,14 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
 public class MainActivity extends AppCompatActivity implements RecyclerViewClickInterface{
 
-
     private Toolbar mainActivityToolbar;
     private FloatingActionButton addPostBtn;
+    private String current_user_Id;
 
     private FirebaseAuth mAuth;
 
@@ -55,6 +57,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
     List<String> techUpdateTitle;
     SwipeRefreshLayout swipeRefreshLayout;
 
+    private FirebaseFirestore db;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         setContentView(R.layout.activity_main);
 
         mAuth=FirebaseAuth.getInstance();
+        db=FirebaseFirestore.getInstance();
 
         mainActivityToolbar=(Toolbar) findViewById(R.id.mainActivityToolbar);
         setSupportActionBar(mainActivityToolbar);
@@ -206,9 +211,30 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
     @Override
     protected void onStart() {
         super.onStart();
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if(currentUser==null){
             sendToLogin();
+        }
+        else{
+            current_user_Id=mAuth.getCurrentUser().getUid();
+            db.collection("Users").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if(task.isSuccessful()){
+                        for (DocumentSnapshot document : task.getResult()) {
+                            if(!document.exists()){  //TODO Modifications required
+                                sendToSetup();
+                            }
+                        }
+
+                    }
+                    else{
+                        String errorMsg=task.getException().getMessage();
+                        Toast.makeText(MainActivity.this,"Error: "+errorMsg,Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+            });
         }
     }
 

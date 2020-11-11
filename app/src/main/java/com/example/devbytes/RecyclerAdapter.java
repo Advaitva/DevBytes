@@ -1,5 +1,7 @@
 package com.example.devbytes;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +11,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
@@ -34,6 +40,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.rowCountTextView.setText(String.valueOf(position));
+
         holder.textView.setText(techUpdate.get(position));
     }
 
@@ -50,7 +57,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            imageView = itemView.findViewById(R.id.imageView);
+            imageView = itemView.findViewById(R.id.postImage);
+//        try {
+//            Bitmap bitmap = BitmapFactory.decodeStream((InputStream) new URL("https://placeimg.com/640/480/abstract").getContent());
+//            imageView.setImageBitmap(bitmap);
+//        } catch (MalformedURLException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } TODO Add image feature
             textView = itemView.findViewById(R.id.textView);
             rowCountTextView = itemView.findViewById(R.id.rowCountTextView);
 

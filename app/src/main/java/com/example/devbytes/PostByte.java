@@ -3,7 +3,7 @@ package com.example.devbytes;
 
 import java.util.Date;
 
-public class PostByte {
+public class PostByte extends BytePostId {
     public String user_id, post_image,post_title, post_body;
     Date timestamp;
 

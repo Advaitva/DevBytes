@@ -48,8 +48,10 @@ public class PostsFragment extends Fragment {
                             return;
                         }
                         for(DocumentChange doc: value.getDocumentChanges()){
+
                             if(doc.getType()== DocumentChange.Type.ADDED){
-                                PostByte postByte=doc.getDocument().toObject(PostByte.class);
+                                String bytePostId=doc.getDocument().getId();
+                                PostByte postByte=doc.getDocument().toObject(PostByte.class).withId(bytePostId);
 
                                 byteList.add(postByte);
                                 bytesRecyclerAdapter.notifyDataSetChanged();

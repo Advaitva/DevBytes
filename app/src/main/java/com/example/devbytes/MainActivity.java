@@ -55,7 +55,7 @@ import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
 public class MainActivity extends AppCompatActivity{
 
     private Toolbar mainActivityToolbar;
-    private FloatingActionButton addPostBtn;
+    private FloatingActionButton addPostBtn,feedBtn;
     private String current_user_Id;
 
     private FirebaseAuth mAuth;
@@ -66,7 +66,6 @@ public class MainActivity extends AppCompatActivity{
 
     private BottomNavigationView bottomNavigationView;
 
-    private FeedFragment feedFragment;
     private PostsFragment postsFragment;
     private  NotificationFragment notificationFragment;
 
@@ -84,10 +83,9 @@ public class MainActivity extends AppCompatActivity{
 
             bottomNavigationView = findViewById(R.id.bottomNavigationView);
             //Fragments
-            feedFragment = new FeedFragment();
             postsFragment = new PostsFragment();
             notificationFragment = new NotificationFragment();
-            replaceFragment(feedFragment);
+            replaceFragment(postsFragment);
             bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -95,9 +93,7 @@ public class MainActivity extends AppCompatActivity{
                         case R.id.bottom_nav_bytes:
                             replaceFragment(postsFragment);
                             return true;
-                        case R.id.bottom_nav_feed:
-                            replaceFragment(feedFragment);
-                            return true;
+
                         case R.id.bottom_nav_notif:
                             replaceFragment(notificationFragment);
                             return true;
@@ -117,6 +113,14 @@ public class MainActivity extends AppCompatActivity{
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(MainActivity.this, CreatePost.class);
+                    startActivity(intent);
+                }
+            });
+            feedBtn=findViewById(R.id.action_feed);
+            feedBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent=new Intent(MainActivity.this,FeedActivity.class);
                     startActivity(intent);
                 }
             });

@@ -11,6 +11,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -19,13 +21,18 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +44,7 @@ public class BytesRecyclerAdapter extends RecyclerView.Adapter<BytesRecyclerAdap
     public Context context;
 
     private FirebaseFirestore firebaseFirestore;
+    private FirebaseAuth firebaseAuth;
 
     public BytesRecyclerAdapter(List<PostByte> postByteList){
         this.postByteList=postByteList;
@@ -47,6 +55,8 @@ public class BytesRecyclerAdapter extends RecyclerView.Adapter<BytesRecyclerAdap
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.byte_item,parent,false);
 
+        firebaseAuth=FirebaseAuth.getInstance();
+        firebaseFirestore=FirebaseFirestore.getInstance();
         context=parent.getContext();
 
         return new ViewHolder(view);
@@ -54,6 +64,9 @@ public class BytesRecyclerAdapter extends RecyclerView.Adapter<BytesRecyclerAdap
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
+        final String bytePostId=postByteList.get(position).BytePostId;
+        final String currentUserId=firebaseAuth.getCurrentUser().getUid();
+
         String titleData=postByteList.get(position).getPost_title();
         holder.setByteTitle(titleData);
         String imageData=postByteList.get(position).getPost_image();
@@ -66,7 +79,6 @@ public class BytesRecyclerAdapter extends RecyclerView.Adapter<BytesRecyclerAdap
         holder.setDate(dateString);
 
         final String user_id=postByteList.get(position).getUser_id();
-        firebaseFirestore=FirebaseFirestore.getInstance();
 
         firebaseFirestore.collection("Users").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
@@ -90,6 +102,54 @@ public class BytesRecyclerAdapter extends RecyclerView.Adapter<BytesRecyclerAdap
         });
 
 
+        firebaseFirestore.collection("Posts/" + bytePostId + "/Likes").addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                if(!value.isEmpty()){
+                    int count=value.size();
+                    holder.updateLikesCount(count);
+
+                }
+                else{
+                    holder.updateLikesCount(0);
+                }
+            }
+        });
+
+        firebaseFirestore.collection("Posts/" + bytePostId + "/Likes").document(currentUserId).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                if(value.exists()){
+                    holder.byteLikeImage.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_byte_card_like_active));
+                }
+                else{
+                    holder.byteLikeImage.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_byte_card_like));
+                }
+            }
+        });
+
+        holder.byteLikeImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                firebaseFirestore.collection("Posts/" + bytePostId + "/Likes").document(currentUserId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if(!task.getResult().exists()){
+
+                            Map<String,Object> likeMap=new HashMap<>();
+                            likeMap.put("timestamp", FieldValue.serverTimestamp());
+
+                            firebaseFirestore.collection("Posts/" + bytePostId + "/Likes").document(currentUserId).set(likeMap);
+
+                        }
+                        else{
+                            firebaseFirestore.collection("Posts/" + bytePostId + "/Likes").document(currentUserId).delete();
+                        }
+                    }
+                });
+            }
+        });
+
 
     }
 
@@ -101,12 +161,13 @@ public class BytesRecyclerAdapter extends RecyclerView.Adapter<BytesRecyclerAdap
     public class ViewHolder extends RecyclerView.ViewHolder{
 
         private  View mView;
-        private TextView byteTitle,byteBody,userName,byteDate;
-        private ImageView byteImage;
+        private TextView byteTitle,byteBody,userName,byteDate,byteLikeCount;
+        private ImageView byteImage,byteLikeImage;
         private CircleImageView userImage;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             mView=itemView;
+            byteLikeImage=mView.findViewById(R.id.likeBtn);
         }
         public void setByteTitle(String titleText){
             byteTitle=mView.findViewById(R.id.byte_title);
@@ -132,6 +193,10 @@ public class BytesRecyclerAdapter extends RecyclerView.Adapter<BytesRecyclerAdap
         public void setDate(String date){
             byteDate=mView.findViewById(R.id.byte_date);
             byteDate.setText(date);
+        }
+        public void updateLikesCount(int likeCount){
+            byteLikeCount=mView.findViewById(R.id.likeCount);
+            byteLikeCount.setText(likeCount + " Likes");
         }
     }
 }

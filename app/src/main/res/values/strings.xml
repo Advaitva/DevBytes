@@ -28,4 +28,9 @@
     <string name="byte_title">Byte Title</string>
     <string name="byte_body">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
     <string name="byte_image">Byte Image</string>
+    <string name="noLikes">0 Likes</string>
+    <string name="notifMessage">No Notifications</string>
+    <string name="feed_body">Feed Body</string>
+    <string name="feed_author">Feed Author</string>
+    <string name="feed_title">Feed Title</string>
 </resources>

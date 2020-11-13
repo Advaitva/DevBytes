@@ -18,7 +18,7 @@ public class ReadTech extends AppCompatActivity {
         readByteToolbar=findViewById(R.id.readByteToolbar);
         setSupportActionBar(readByteToolbar);
 
-        TextView textView = findViewById(R.id.textView);
+        TextView textView = findViewById(R.id.feedTitle);
         String update = getIntent().getStringExtra("Tech");
         getSupportActionBar().setTitle(update);
         textView.setText("Content goes here...");

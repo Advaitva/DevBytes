@@ -18,4 +18,14 @@
     <string name="desc_hint">Post Description....</string>
     <string name="post_btn">Post</string>
     <string name="cardViewTitle">Card View Layout</string>
+    <string name="title_feed">Feed</string>
+    <string name="title_bytes">Bytes</string>
+    <string name="title_notification">Notifications</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="username_post">Username</string>
+    <string name="date_post">Posting date</string>
+    <string name="byte_title">Byte Title</string>
+    <string name="byte_body">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
+    <string name="byte_image">Byte Image</string>
 </resources>

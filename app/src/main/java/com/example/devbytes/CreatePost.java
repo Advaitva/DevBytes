@@ -1,4 +1,4 @@
-package com.example.devbytes;
+package com.example.devbytes; //TODO image compression
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,6 +10,7 @@ import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.PointerIcon;
 import android.view.View;
 import android.widget.Button;
@@ -22,10 +23,13 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -34,6 +38,8 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 
 public class CreatePost extends AppCompatActivity {
 
@@ -73,13 +79,14 @@ public class CreatePost extends AppCompatActivity {
         firebaseAuth=FirebaseAuth.getInstance();
         currentUser=firebaseAuth.getCurrentUser().getUid();
 
+
         new_postImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 CropImage.activity()
                         .setGuidelines(CropImageView.Guidelines.ON)
                         .setMinCropResultSize(512,512)
-                        .setAspectRatio(1,1)
+                        .setAspectRatio(2,1)
                         .start(CreatePost.this);
             }
         });
@@ -91,7 +98,7 @@ public class CreatePost extends AppCompatActivity {
                 final String body=new_postBody.getText().toString();
                 if(!TextUtils.isEmpty(title) && !TextUtils.isEmpty(body) && postImageUri!=null){
                     postProgress.setVisibility(View.VISIBLE);
-                    String randomName= FieldValue.serverTimestamp().toString();
+                    final String randomName = UUID.randomUUID().toString();;
                     StorageReference path=storageReference.child("post_byte").child(randomName+".jpg");
                     path.putFile(postImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
@@ -109,7 +116,7 @@ public class CreatePost extends AppCompatActivity {
                                             postMap.put("post_title",title);
                                             postMap.put("post_body",body);
                                             postMap.put("user_id",currentUser);
-                                            postMap.put("timestamp",FieldValue.serverTimestamp());
+                                            postMap.put("timestamp", FieldValue.serverTimestamp());
 
                                             firebaseFirestore.collection("Posts").add(postMap).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                                 @Override
@@ -166,4 +173,5 @@ public class CreatePost extends AppCompatActivity {
             }
         }
     }
+
 }

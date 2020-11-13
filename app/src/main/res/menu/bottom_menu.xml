@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/bottom_nav_feed"
+        android:icon="@drawable/ic_bottom_nav_feed"
+        android:title="@string/title_feed"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/bottom_nav_bytes"
+        android:icon="@drawable/ic_bottom_nav_bytes"
+        android:title="@string/title_bytes"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/bottom_nav_notif"
+        android:icon="@drawable/ic_bottom_nav_notif"
+        android:title="@string/title_notification"
+        app:showAsAction="always" />
+</menu>

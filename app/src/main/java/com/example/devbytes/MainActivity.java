@@ -1,8 +1,11 @@
 package com.example.devbytes;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.ItemTouchHelper;
 
 import com.android.volley.Request;
@@ -13,6 +16,8 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomnavigation.BottomNavigationItemView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
 import android.content.Intent;
@@ -31,8 +36,11 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import org.json.JSONArray;
@@ -44,7 +52,7 @@ import java.util.List;
 
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
-public class MainActivity extends AppCompatActivity implements RecyclerViewClickInterface{
+public class MainActivity extends AppCompatActivity{
 
     private Toolbar mainActivityToolbar;
     private FloatingActionButton addPostBtn;
@@ -52,12 +60,15 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
     private FirebaseAuth mAuth;
 
-    RecyclerView recyclerView;
-    RecyclerAdapter recyclerAdapter;
-    List<String> techUpdateTitle;
-    SwipeRefreshLayout swipeRefreshLayout;
+
 
     private FirebaseFirestore db;
+
+    private BottomNavigationView bottomNavigationView;
+
+    private FeedFragment feedFragment;
+    private PostsFragment postsFragment;
+    private  NotificationFragment notificationFragment;
 
 
     @Override
@@ -68,145 +79,53 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         mAuth=FirebaseAuth.getInstance();
         db=FirebaseFirestore.getInstance();
 
-        mainActivityToolbar=(Toolbar) findViewById(R.id.mainActivityToolbar);
-        setSupportActionBar(mainActivityToolbar);
-
-        getSupportActionBar().setTitle("DevBytes");
-
-        addPostBtn=findViewById(R.id.action_add);
-        addPostBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent=new Intent(MainActivity.this,CreatePost.class);
-                startActivity(intent);
-            }
-        });
-
-        techUpdateTitle = new ArrayList<>();
-        RequestQueue requestQueue=Volley.newRequestQueue(this);
-
-        String api="https://devbytes-api.herokuapp.com/data";
-//        String api="https://randomuser.me/api";
+        if(mAuth.getCurrentUser()!=null) {
 
 
-        JsonArrayRequest objectRequest= new JsonArrayRequest(Request.Method.GET, api, null, new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        try {
-                            for(int i=0;i<response.length();i++){
-                                JSONObject obj=response.getJSONObject(i);
-                                techUpdateTitle.add(obj.getString("post_title"));
-
-                            }
-                        }catch (JSONException e){
-                            e.printStackTrace();
-                        }
+            bottomNavigationView = findViewById(R.id.bottomNavigationView);
+            //Fragments
+            feedFragment = new FeedFragment();
+            postsFragment = new PostsFragment();
+            notificationFragment = new NotificationFragment();
+            replaceFragment(feedFragment);
+            bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.bottom_nav_bytes:
+                            replaceFragment(postsFragment);
+                            return true;
+                        case R.id.bottom_nav_feed:
+                            replaceFragment(feedFragment);
+                            return true;
+                        case R.id.bottom_nav_notif:
+                            replaceFragment(notificationFragment);
+                            return true;
+                        default:
+                            return false;
                     }
-                 },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("API response",error.toString());
-                        Toast.makeText(MainActivity.this, "Something went wrong during api call", Toast.LENGTH_SHORT).show();
-                    }
-        });
-        requestQueue.add(objectRequest);
-        recyclerView = findViewById(R.id.recyclerView);
-        recyclerAdapter = new RecyclerAdapter(techUpdateTitle, this);
-        recyclerView.setAdapter(recyclerAdapter);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
-        recyclerView.addItemDecoration(dividerItemDecoration);
-        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                recyclerAdapter.notifyDataSetChanged();
-                swipeRefreshLayout.setRefreshing(false);
-            }
-        });
+                }
+            });
 
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
-        itemTouchHelper.attachToRecyclerView(recyclerView);
+            mainActivityToolbar = (Toolbar) findViewById(R.id.mainActivityToolbar);
+            setSupportActionBar(mainActivityToolbar);
 
-    }
-    String deletedTech = null;
-    List<String> archivedTech = new ArrayList<>();
-    ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-        @Override
-        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-            return false;
+            getSupportActionBar().setTitle("DevBytes");
+
+            addPostBtn = findViewById(R.id.action_add);
+            addPostBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(MainActivity.this, CreatePost.class);
+                    startActivity(intent);
+                }
+            });
+
         }
 
-        @Override
-        public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder, int direction) {
-
-            final int position = viewHolder.getAdapterPosition();
-
-            switch (direction) {
-                case ItemTouchHelper.LEFT:
-                    deletedTech = techUpdateTitle.get(position);
-                    techUpdateTitle.remove(position);
-                    recyclerAdapter.notifyItemRemoved(position);
-                    Snackbar.make(recyclerView, deletedTech, Snackbar.LENGTH_LONG)
-                            .setAction("Undo", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    techUpdateTitle.add(position, deletedTech);
-                                    recyclerAdapter.notifyItemInserted(position);
-                                }
-                            }).show();
-                    break;
-                case ItemTouchHelper.RIGHT:
-                    final String tech = techUpdateTitle.get(position);
-                    archivedTech.add(tech);
-
-                    techUpdateTitle.remove(position);
-                    recyclerAdapter.notifyItemRemoved(position);
-
-                    Snackbar.make(recyclerView, tech + ", Archived.", Snackbar.LENGTH_LONG)
-                            .setAction("Undo", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    archivedTech.remove(archivedTech.lastIndexOf(tech));
-                                    techUpdateTitle.add(position, tech);
-                                    recyclerAdapter.notifyItemInserted(position);
-                                }
-                            }).show();
-
-                    break;
-            }
-        }
-
-        @Override
-        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-
-            new RecyclerViewSwipeDecorator.Builder(MainActivity.this, c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-                    .addSwipeLeftBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.colorAccent))
-                    .addSwipeLeftActionIcon(R.drawable.ic_delete_black_24dp)
-                    .addSwipeRightBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.colorPrimaryDark))
-                    .addSwipeRightActionIcon(R.drawable.ic_archive_black_24dp)
-                    .setActionIconTint(ContextCompat.getColor(recyclerView.getContext(), android.R.color.white))
-                    .create()
-                    .decorate();
-
-            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-        }
     };
 
 
-
-    //    These are the interface Methods from our custom RecyclerViewClickInterface
-    @Override
-    public void onItemClick(int position) {
-        Intent intent = new Intent(this, ReadTech.class);
-        intent.putExtra("Tech", techUpdateTitle.get(position));
-        startActivity(intent);
-    }
-    @Override
-    public void onLongItemClick(final int position) {
-//        techUpdateTitle.remove(position);
-//        recyclerAdapter.notifyItemRemoved(position);
-    }
 
     @Override
     protected void onStart() {
@@ -273,5 +192,10 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
     public void logout(){
         mAuth.signOut();
         sendToLogin();
+    }
+    private void replaceFragment(Fragment fragment){
+        FragmentTransaction fragmentTransaction=getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.mainFragContainer,fragment);
+        fragmentTransaction.commit();
     }
 }
